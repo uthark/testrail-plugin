@@ -12,7 +12,7 @@ Using the Plugin
 -----
 1. This plugin is not yet available through Plugin Manager. It must be installed manually. To do this, Download the plugin and use the command
 
-''' mvn package '''
+'mvn package'
 
 This will create the hpi file (found in /testrail-plugin/target), which you can then upload to your Jenkins installation.
 
