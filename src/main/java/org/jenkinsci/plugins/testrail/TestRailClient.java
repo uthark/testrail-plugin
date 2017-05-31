@@ -298,13 +298,16 @@ public class TestRailClient {
         return c;
     }
 
-    public TestRailResponse addResultsForCases(int runId, Results results) 
+    public TestRailResponse addResultsForCases(int runId, Results results, String milestoneName) 
             throws IOException, TestRailException {
         JSONArray a = new JSONArray();
         for (int i = 0; i < results.getResults().size(); i++) {
             JSONObject o = new JSONObject();
             Result r = results.getResults().get(i);
             o.put("case_id", r.getCaseId()).put("status_id", r.getStatusId()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
+            if (!milestoneName.equals("")) {
+                o.put("version", milestoneName);
+            }
             a.put(o);
         }
 
@@ -347,6 +350,15 @@ public class TestRailClient {
          }
       }
       throw new ElementNotFoundException("Milestone id not found.");
+    }
+
+    public String getMilestoneName(String milestoneId, int projectId) throws IOException, ElementNotFoundException {
+        for (Milestone mstone: getMilestones(projectId)) {
+            if (mstone.getId() == milestoneId) {
+                return mstone.getName();
+            }
+        }
+        throw new ElementNotFoundException("Milestone " + milestoneId + " not found in Project " + projectId);
     }
 
     public boolean closeRun(int runId)
