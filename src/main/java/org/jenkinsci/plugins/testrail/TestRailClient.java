@@ -305,9 +305,7 @@ public class TestRailClient {
             JSONObject o = new JSONObject();
             Result r = results.getResults().get(i);
             o.put("case_id", r.getCaseId()).put("status_id", r.getStatusId()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
-            if (!milestoneName.equals("")) {
-                o.put("version", milestoneName);
-            }
+            o.put("version", milestoneName);
             a.put(o);
         }
 
