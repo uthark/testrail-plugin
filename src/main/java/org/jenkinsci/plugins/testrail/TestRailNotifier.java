@@ -140,7 +140,7 @@ public class TestRailNotifier extends Notifier {
         listener.getLogger().println("Uploading results to TestRail.");
         String runComment = "Automated results from Jenkins: " + build.getUrl().toString();
         String milestoneId = testrailMilestone;
-        String milestoneName = "";
+        String milestoneName = null;
         try {
             milestoneName = testrail.getMilestoneName(milestoneId, this.getTestrailProject());
         } catch (Exception e) { }     

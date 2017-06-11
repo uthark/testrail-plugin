@@ -267,7 +267,6 @@ public class TestRailClient {
 
     public Section addSection(String sectionName, int projectId, int suiteId, String parentId) 
             throws IOException, ElementNotFoundException, TestRailException {
-        //Section section = new Section();
         String payload = new JSONObject().put("name", sectionName).put("suite_id", suiteId).put("parent_id", parentId).toString();
         String body = httpPost("index.php?/api/v2/add_section/" + projectId , payload).getBody();
         JSONObject o = new JSONObject(body);
@@ -305,7 +304,9 @@ public class TestRailClient {
             JSONObject o = new JSONObject();
             Result r = results.getResults().get(i);
             o.put("case_id", r.getCaseId()).put("status_id", r.getStatusId()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
-            o.put("version", milestoneName);
+            if (message != null) {
+                o.put("version", milestoneName);
+            }
             a.put(o);
         }
 
@@ -351,12 +352,12 @@ public class TestRailClient {
     }
 
     public String getMilestoneName(String milestoneId, int projectId) throws IOException, ElementNotFoundException {
-        for (Milestone mstone: getMilestones(projectId)) {
-            if (mstone.getId() == milestoneId) {
-                return mstone.getName();
-            }
+      for (Milestone mstone: getMilestones(projectId)) {
+        if (mstone.getId() == milestoneId) {
+          return mstone.getName();
         }
-        throw new ElementNotFoundException("Milestone " + milestoneId + " not found in Project " + projectId);
+      }
+      throw new ElementNotFoundException("Milestone " + milestoneId + " not found in Project " + projectId);
     }
 
     public boolean closeRun(int runId)
