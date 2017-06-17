@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.InterruptedException;
 import java.util.List;
+import java.util.Iterator;
 import static org.jenkinsci.plugins.testrail.Utils.*;
 /**
  * Created by Drew on 3/19/14.
@@ -297,16 +298,21 @@ public class TestRailClient {
         return c;
     }
 
-    public TestRailResponse addResultsForCases(int runId, Results results, String milestoneName) 
+    public TestRailResponse addResultsForCases(int runId, Results results, String extraParameters) 
             throws IOException, TestRailException {
         JSONArray a = new JSONArray();
         for (int i = 0; i < results.getResults().size(); i++) {
             JSONObject o = new JSONObject();
             Result r = results.getResults().get(i);
             o.put("case_id", r.getCaseId()).put("status_id", r.getStatusId()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
-            if (message != null) {
-                o.put("version", milestoneName);
+
+            JSONObject xp = new JSONObject(extraParameters);
+            Iterator<String> keys = xp.keys();
+            while (keys.hasNext()) {
+                String k = keys.next();
+                o.put(k, xp.get(k).toString());
             }
+
             a.put(o);
         }
 

@@ -52,14 +52,18 @@ public class TestRailNotifier extends Notifier {
     private String junitResultsGlob;
     private String testrailMilestone;
     private boolean enableMilestone;
+    private String extraParameters;
+
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone) {
+    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParams) {
         this.testrailProject = testrailProject;
         this.testrailSuite = testrailSuite;
         this.junitResultsGlob = junitResultsGlob;
         this.testrailMilestone = testrailMilestone;
         this.enableMilestone = enableMilestone;
+
+        this.extraParameters = extraParams;
     }
 
     public void setTestrailProject(int project) { this.testrailProject = project;}
@@ -72,6 +76,8 @@ public class TestRailNotifier extends Notifier {
     public void setTestrailMilestone(String milestone) { this.testrailMilestone = milestone; }
     public void setEnableMilestone(boolean mstone) {this.enableMilestone = mstone; }
     public boolean getEnableMilestone() { return  this.enableMilestone; }
+    public void setExtraParameters(String params) { this.extraParameters = params; }
+    public String getExtraParameters() { return this.extraParameters; }
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
@@ -140,16 +146,12 @@ public class TestRailNotifier extends Notifier {
         listener.getLogger().println("Uploading results to TestRail.");
         String runComment = "Automated results from Jenkins: " + build.getUrl().toString();
         String milestoneId = testrailMilestone;
-        String milestoneName = null;
-        try {
-            milestoneName = testrail.getMilestoneName(milestoneId, this.getTestrailProject());
-        } catch (Exception e) { }     
 
         int runId = -1;
         TestRailResponse response;
         try {
             runId = testrail.addRun(testCases.getProjectId(), testCases.getSuiteId(), milestoneId, runComment);
-            response = testrail.addResultsForCases(runId, results, milestoneName);
+            response = testrail.addResultsForCases(runId, results, this.extraParameters);
         } catch (TestRailException e) {
             listener.getLogger().println("Error pushing results to TestRail");
             listener.getLogger().println(e.getMessage());
