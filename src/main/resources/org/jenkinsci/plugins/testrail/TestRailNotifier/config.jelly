@@ -22,4 +22,13 @@
          </f:optionalBlock>
        </table>
   </f:block>
+  <f:block>
+       <table>
+         <f:optionalBlock name="extraParams" title="Extra Parameters" inline="true" checked="${instance.extraParams}">
+           <f:entry title="{Parameters}" field="extraParams">
+             <f:textbox />
+           </f:entry>
+         </f:optionalBlock>
+       </table>
+  </f:block>
 </j:jelly>
