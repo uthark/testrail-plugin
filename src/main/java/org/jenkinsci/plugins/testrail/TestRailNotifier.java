@@ -242,6 +242,7 @@ public class TestRailNotifier extends Notifier {
         private String testrailHost = "";
         private String testrailUser = "";
         private String testrailPassword = "";
+        private String extraParameters = "";
         private TestRailClient testrail = new TestRailClient("", "", "");
 
         /**
@@ -325,7 +326,7 @@ public class TestRailNotifier extends Notifier {
             }
             // TODO: There is probably a better way to do URL validation.
             if (!value.startsWith("http://") && !value.startsWith("https://")) {
-                return FormValidation.error("Host must be a valid URL.");
+                return FormValidation.error("Host must be a valid URL.\nAre you missing the protocol?");
             }
             testrail.setHost(value);
             testrail.setUser("");
@@ -372,6 +373,14 @@ public class TestRailNotifier extends Notifier {
             return FormValidation.ok();
         }
 
+        public FormValidation doCheckExtraParameters(@QueryParameter String value) {
+            if (value == "" || (value.startsWith("{") && value.endsWith("}"))) {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Extra Parameters must be either an empty string or a valid JSON object.");
+            }
+        }
+
         public ListBoxModel doFillTestrailMilestoneItems(@QueryParameter int testrailProject) {
             ListBoxModel items = new ListBoxModel();
             items.add("None", "");
@@ -394,7 +403,7 @@ public class TestRailNotifier extends Notifier {
          * This human readable name is used in the configuration screen.
          */
         public String getDisplayName() {
-            return "TestRail Plugin";
+            return "Send results to Test Rail";
         }
 
         @Override
@@ -404,7 +413,7 @@ public class TestRailNotifier extends Notifier {
             testrailHost = formData.getString("testrailHost");
             testrailUser = formData.getString("testrailUser");
             testrailPassword = formData.getString("testrailPassword");
-
+            extraParameters = formData.getString("extraParams");
 
             // ^Can also use req.bindJSON(this, formData);
             //  (easier when there are many fields; need set* methods for this, like setTestrailHost)
@@ -420,5 +429,7 @@ public class TestRailNotifier extends Notifier {
         public String getTestrailPassword() { return testrailPassword; }
         public void setTestrailInstance(TestRailClient trc) { testrail = trc; }
         public TestRailClient getTestrailInstance() { return testrail; }
+        public void setExtraParameters(String extraParams) { this.extraParameters = extraParams; }
+        public String getExtraParameters() { return extraParameters; }
     }
 }

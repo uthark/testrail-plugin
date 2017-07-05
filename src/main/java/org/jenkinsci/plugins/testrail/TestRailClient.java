@@ -168,8 +168,12 @@ public class TestRailClient {
     }
 
     public boolean authenticationWorks() throws IOException {
-        TestRailResponse response = httpGet("/index.php?/api/v2/get_projects");
-        return (200 == response.getStatus());
+        try {
+            TestRailResponse response = httpGet("/index.php?/api/v2/get_projects");
+            return (200 == response.getStatus());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public Project[] getProjects() throws IOException, ElementNotFoundException {
