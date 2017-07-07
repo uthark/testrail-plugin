@@ -429,7 +429,7 @@ public class TestRailNotifier extends Notifier {
         public String getTestrailPassword() { return testrailPassword; }
         public void setTestrailInstance(TestRailClient trc) { testrail = trc; }
         public TestRailClient getTestrailInstance() { return testrail; }
-        public void setExtraParameters(String extraParams) { this.extraParameters = extraParams; }
-        public String getExtraParameters() { return extraParameters; }
+        public void setExtraParams(String extraParams) { this.extraParameters = extraParams; }
+        public String getExtraParams() { return extraParameters; }
     }
 }
