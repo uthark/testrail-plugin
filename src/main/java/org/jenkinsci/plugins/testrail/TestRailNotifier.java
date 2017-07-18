@@ -48,17 +48,18 @@ public class TestRailNotifier extends Notifier {
     private String testrailMilestone;
     private boolean enableMilestone;
     private String extraParameters;
+    private boolean createNewTestcases;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParams) {
+    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParameters, boolean createNewTestcases) {
         this.testrailProject = testrailProject;
         this.testrailSuite = testrailSuite;
         this.junitResultsGlob = junitResultsGlob;
         this.testrailMilestone = testrailMilestone;
         this.enableMilestone = enableMilestone;
-
         this.extraParameters = extraParams;
+        this.createNewTestcases = createNewTestcases;
     }
 
     public void setTestrailProject(int project) { this.testrailProject = project;}
@@ -73,6 +74,8 @@ public class TestRailNotifier extends Notifier {
     public boolean getEnableMilestone() { return  this.enableMilestone; }
     public void setExtraParameters(String params) { this.extraParameters = params; }
     public String getExtraParameters() { return this.extraParameters; }
+    public void setCreateNewTestcases(boolean newcases) {this.createNewTestcases = newcases; }
+    public boolean getCreateNewTestcases() { return  this.createNewTestcases; }
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
@@ -197,28 +200,35 @@ public class TestRailNotifier extends Notifier {
 
         if (suite.hasCases()) {
             for (Testcase testcase : suite.getCases()) {
-                int caseId;
+                int caseId = 0;
+                boolean addResult = false;
                 try {
                     caseId = existingCases.getCaseId(suite.getName(), testcase.getName());
+                    addResult = true;
                 } catch (ElementNotFoundException e) {
-                    caseId = existingCases.addCase(testcase, sectionId);
+                    if (this.createNewTestcases) {
+                        caseId = existingCases.addCase(testcase, sectionId);
+                        addResult = true;
+                    }
                 }
-                CaseStatus caseStatus;
-                Float caseTime = testcase.getTime();
-                String caseComment = null;
-                Failure caseFailure = testcase.getFailure();
-                if (caseFailure != null) {
-                    caseStatus = CaseStatus.FAILED;
-                    caseComment = (caseFailure.getMessage() == null) ? caseFailure.getText() : caseFailure.getMessage() + "\n" + caseFailure.getText();
-                } else if (testcase.getSkipped() != null) {
-                    caseStatus = CaseStatus.UNTESTED;
-                } else {
-                    caseStatus = CaseStatus.PASSED;
-                }
+                if (addResult) {
+	                CaseStatus caseStatus;
+	                Float caseTime = testcase.getTime();
+	                String caseComment = null;
+	                Failure caseFailure = testcase.getFailure();
+	                if (caseFailure != null) {
+	                    caseStatus = CaseStatus.FAILED;
+	                    caseComment = (caseFailure.getMessage() == null) ? caseFailure.getText() : caseFailure.getMessage() + "\n" + caseFailure.getText();
+	                } else if (testcase.getSkipped() != null) {
+	                    caseStatus = CaseStatus.UNTESTED;
+	                } else {
+	                    caseStatus = CaseStatus.PASSED;
+	                }
 
-                if (caseStatus != CaseStatus.UNTESTED){
-                    results.addResult(new Result(caseId, caseStatus, caseComment, caseTime));
-                }
+	                if (caseStatus != CaseStatus.UNTESTED){
+	                    results.addResult(new Result(caseId, caseStatus, caseComment, caseTime));
+	                }
+	            }
             }
         }
 
