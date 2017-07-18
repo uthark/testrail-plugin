@@ -319,10 +319,12 @@ public class TestRailClient {
     private Run createRunFromJson(JSONObject o) {
         Run r = new Run();
 
-        r.setId(o.getString("id"));
-        r.setSuiteId(o.getString("suite_id"));
-        r.setDescription(o.getString("description"));
-        r.setMilestoneId(o.getString("milestone_id"));
+        r.setId(o.getInt("id") + "");
+        r.setSuiteId(o.getInt("suite_id") + "");
+        r.setName(o.getString("name"));
+        if (!o.isNull("milestone_id")) {
+            r.setMilestoneId(o.getInt("milestone_id") + "");
+        }
 
         return r;
     }

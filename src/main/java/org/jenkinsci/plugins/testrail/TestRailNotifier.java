@@ -63,11 +63,11 @@ public class TestRailNotifier extends Notifier {
         this.extraParameters = extraParams;
         this.createNewTestcases = createNewTestcases;
         this.useExistingRun = useExistingRun;
-        this.testRun = testRun;
 
         if (testRun == null || testRun.isEmpty()) {
             testRun = "0";
         }
+        this.testRun = testRun;
     }
 
     public void setTestrailProject(int project) { this.testrailProject = project;}
@@ -423,15 +423,15 @@ public class TestRailNotifier extends Notifier {
             return items;
         }
 
-        public ListBoxModel doFillTestRunItems(@QueryParameter int testRailProject) {
+        public ListBoxModel doFillTestRunItems(@QueryParameter int testrailProject) {
             ListBoxModel items = new ListBoxModel();
             testrail.setHost(getTestrailHost());
             testrail.setUser(getTestrailUser());
             testrail.setPassword(getTestrailPassword());
             
             try {
-                for (Run run : testrail.getRuns(testRailProject)) {
-                    items.add(run.getDescription(), run.getId());
+                for (Run run : testrail.getRuns(testrailProject)) {
+                    items.add(run.getName(), run.getId());
                 }
             } catch (ElementNotFoundException e) {
             } catch (IOException e) { }
