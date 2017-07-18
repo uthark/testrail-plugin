@@ -223,7 +223,7 @@ public class TestRailClient {
         return suites;
     }
 
-    public Run[] getRuns(int projectId) {
+    public Run[] getRuns(int projectId) throws IOException, ElementNotFoundException {
         String body = httpGet("index.php?/api/v2/get_runs/" + projectId).getBody();
 
         JSONArray json;
@@ -319,8 +319,8 @@ public class TestRailClient {
     private Run createRunFromJson(JSONObject o) {
         Run r = new Run();
 
-        r.setId(o.getInt("id"));
-        r.setSuiteId(o.getInt("suite_id"));
+        r.setId(o.getString("id"));
+        r.setSuiteId(o.getString("suite_id"));
         r.setDescription(o.getString("description"));
         r.setMilestoneId(o.getString("milestone_id"));
 

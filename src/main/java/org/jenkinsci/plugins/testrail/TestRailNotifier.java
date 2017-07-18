@@ -49,10 +49,12 @@ public class TestRailNotifier extends Notifier {
     private boolean enableMilestone;
     private String extraParameters;
     private boolean createNewTestcases;
+    private boolean useExistingRun;
+    private String testRun;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParameters, boolean createNewTestcases) {
+    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParams, boolean createNewTestcases, boolean useExistingRun, String testRun) {
         this.testrailProject = testrailProject;
         this.testrailSuite = testrailSuite;
         this.junitResultsGlob = junitResultsGlob;
@@ -60,6 +62,12 @@ public class TestRailNotifier extends Notifier {
         this.enableMilestone = enableMilestone;
         this.extraParameters = extraParams;
         this.createNewTestcases = createNewTestcases;
+        this.useExistingRun = useExistingRun;
+        this.testRun = testRun;
+
+        if (testRun == null || testRun.isEmpty()) {
+            testRun = "0";
+        }
     }
 
     public void setTestrailProject(int project) { this.testrailProject = project;}
@@ -72,10 +80,14 @@ public class TestRailNotifier extends Notifier {
     public void setTestrailMilestone(String milestone) { this.testrailMilestone = milestone; }
     public void setEnableMilestone(boolean mstone) {this.enableMilestone = mstone; }
     public boolean getEnableMilestone() { return  this.enableMilestone; }
-    public void setExtraParameters(String params) { this.extraParameters = params; }
-    public String getExtraParameters() { return this.extraParameters; }
+    public void setExtraParams(String params) { this.extraParameters = params; }
+    public String getExtraParams() { return this.extraParameters; }
     public void setCreateNewTestcases(boolean newcases) {this.createNewTestcases = newcases; }
     public boolean getCreateNewTestcases() { return  this.createNewTestcases; }
+    public void setUseExistingRun(boolean newrun) { this.useExistingRun = newrun; }
+    public boolean getUseExistingRun() { return this.useExistingRun; }
+    public void setTestRun(String runId) { this.testRun = runId; }
+    public String getTestRun() { return this.testRun; }
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
@@ -143,12 +155,13 @@ public class TestRailNotifier extends Notifier {
 
         listener.getLogger().println("Uploading results to TestRail.");
         String runComment = "Automated results from Jenkins: " + build.getUrl().toString();
-        String milestoneId = testrailMilestone;
 
-        int runId = -1;
+        int runId = Integer.parseInt(testRun);
         TestRailResponse response;
         try {
-            runId = testrail.addRun(testCases.getProjectId(), testCases.getSuiteId(), milestoneId, runComment);
+            if (!this.useExistingRun) {
+                runId = testrail.addRun(testCases.getProjectId(), testCases.getSuiteId(), testrailMilestone, runComment);
+            }
             response = testrail.addResultsForCases(runId, results, this.extraParameters);
         } catch (TestRailException e) {
             listener.getLogger().println("Error pushing results to TestRail");
@@ -165,7 +178,9 @@ public class TestRailNotifier extends Notifier {
             listener.getLogger().println("body :\n" + response.getBody());
         }
         try {
-            testrail.closeRun(runId);
+            if (!this.useExistingRun) {
+                testrail.closeRun(runId);
+            }
         } catch (Exception e) {
             listener.getLogger().println("Failed to close test run in TestRail.");
             listener.getLogger().println("EXCEPTION: " + e.getMessage());
@@ -252,7 +267,6 @@ public class TestRailNotifier extends Notifier {
         private String testrailHost = "";
         private String testrailUser = "";
         private String testrailPassword = "";
-        private String extraParameters = "";
         private TestRailClient testrail = new TestRailClient("", "", "");
 
         /**
@@ -323,8 +337,9 @@ public class TestRailNotifier extends Notifier {
 
         public FormValidation doCheckJunitResultsGlob(@QueryParameter String value)
                 throws IOException, ServletException {
-            if (value.length() == 0)
+            if (value.length() == 0) {
                 return FormValidation.warning("Please select test result path.");
+            }
             // TODO: Should we check to see if the files exist? Probably not.
             return FormValidation.ok();
         }
@@ -393,6 +408,10 @@ public class TestRailNotifier extends Notifier {
 
         public ListBoxModel doFillTestrailMilestoneItems(@QueryParameter int testrailProject) {
             ListBoxModel items = new ListBoxModel();
+            testrail.setHost(getTestrailHost());
+            testrail.setUser(getTestrailUser());
+            testrail.setPassword(getTestrailPassword());
+            
             items.add("None", "");
             try {
                 for (Milestone mstone : testrail.getMilestones(testrailProject)) {
@@ -401,6 +420,22 @@ public class TestRailNotifier extends Notifier {
             } catch (ElementNotFoundException e) {
             } catch (IOException e) {
             }
+            return items;
+        }
+
+        public ListBoxModel doFillTestRunItems(@QueryParameter int testRailProject) {
+            ListBoxModel items = new ListBoxModel();
+            testrail.setHost(getTestrailHost());
+            testrail.setUser(getTestrailUser());
+            testrail.setPassword(getTestrailPassword());
+            
+            try {
+                for (Run run : testrail.getRuns(testRailProject)) {
+                    items.add(run.getDescription(), run.getId());
+                }
+            } catch (ElementNotFoundException e) {
+            } catch (IOException e) { }
+
             return items;
         }
 
@@ -423,7 +458,6 @@ public class TestRailNotifier extends Notifier {
             testrailHost = formData.getString("testrailHost");
             testrailUser = formData.getString("testrailUser");
             testrailPassword = formData.getString("testrailPassword");
-            extraParameters = formData.getString("extraParams");
 
             // ^Can also use req.bindJSON(this, formData);
             //  (easier when there are many fields; need set* methods for this, like setTestrailHost)
@@ -439,7 +473,5 @@ public class TestRailNotifier extends Notifier {
         public String getTestrailPassword() { return testrailPassword; }
         public void setTestrailInstance(TestRailClient trc) { testrail = trc; }
         public TestRailClient getTestrailInstance() { return testrail; }
-        public void setExtraParams(String extraParams) { this.extraParameters = extraParams; }
-        public String getExtraParams() { return extraParameters; }
     }
 }

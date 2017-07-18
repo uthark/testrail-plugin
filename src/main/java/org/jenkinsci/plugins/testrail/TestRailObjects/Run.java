@@ -23,18 +23,18 @@ package org.jenkinsci.plugins.testrail.TestRailObjects;
  * Created by Drew on 3/24/2014.
  */
 public class Run {
-    private int suiteId;
-    private int id;
+    private String suiteId;
+    private String id;
     private String description;
     private String milestoneId;
 
-    public void setSuiteId(int suiteId) { this.suiteId = suiteId; }
-    public void setId(int id) { this.id = id; }
+    public void setSuiteId(String suiteId) { this.suiteId = suiteId; }
+    public void setId(String id) { this.id = id; }
     public void setDescription(String description) { this.description = description; }
     public void setMilestoneId(String mid) { this.milestoneId = mid; }
 
-    public int getSuiteId() { return this.suiteId; }
-    public int getId() { return this.id; }
+    public String getSuiteId() { return this.suiteId; }
+    public String getId() { return this.id; }
     public String getDescription() { return this.description; }
     public String getMilestoneId() {return this.milestoneId; }
 }
