@@ -223,13 +223,32 @@ public class TestRailClient {
         return suites;
     }
 
+    public Run[] getRuns(int projectId) {
+        String body = httpGet("index.php?/api/v2/get_runs/" + projectId).getBody();
+
+        JSONArray json;
+
+        try {
+            json = new JSONArray(body);
+        } catch (JSONException e) {
+            throw new ElementNotFoundException("No runs for project " + projectId + "! Response from TestRail is: \n" + body);
+        }
+
+        Run[] runs = new Run[json.length()];
+        for (int i = 0; i < json.length(); i++) {
+            JSONObject o = json.getJSONObject(i);
+            runs[i] = createRunFromJson(o);
+        }
+
+        return runs;
+    }
+
     public String getCasesString(int projectId, int suiteId) {
         return "index.php?/api/v2/get_cases/" + projectId + "&suite_id=" + suiteId;
     }
 
     public Case[] getCases(int projectId, int suiteId) throws IOException, ElementNotFoundException {
-        // "/#{project_id}&suite_id=#{suite_id}#{section_string}"
-        String body = httpGet("index.php?/api/v2/get_cases/" + projectId + "&suite_id=" + suiteId).getBody();
+        String body = httpGet(getCasesString(projectId, suiteId)).getBody();
 
         JSONArray json;
 
@@ -295,6 +314,17 @@ public class TestRailClient {
         s.setRefs(o.optString("refs"));
 
         return s;
+    }
+
+    private Run createRunFromJson(JSONObject o) {
+        Run r = new Run();
+
+        r.setId(o.getInt("id"));
+        r.setSuiteId(o.getInt("suite_id"));
+        r.setDescription(o.getString("description"));
+        r.setMilestoneId(o.getString("milestone_id"));
+
+        return r;
     }
 
     public Case addCase(Testcase caseToAdd, int sectionId) 
