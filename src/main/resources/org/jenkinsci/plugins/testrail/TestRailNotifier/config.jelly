@@ -13,13 +13,35 @@
   <f:entry title="Test Report XMLs" field="junitResultsGlob">
     <f:textbox />
   </f:entry>
+  <f:entry title="Create new testcases" field="createNewTestcases">
+    <f:checkbox/>
+  </f:entry>
+
   <f:block>
-       <table>
-         <f:optionalBlock name="enableMilestone" title="Use milestone" inline="true" checked="${instance.enableMilestone}">
-           <f:entry title="Milestone" field="testrailMilestone">
-             <f:select />
-           </f:entry>
-         </f:optionalBlock>
-       </table>
+   <table>
+     <f:optionalBlock name="useExistingRun" title="Post to existing Run" inline="true" checked="${instance.useExistingRun}">
+       <f:entry title="Test Run" field="testRun">
+         <f:select />
+       </f:entry>
+     </f:optionalBlock>
+   </table>
+  </f:block>
+
+  <f:block>
+   <table>
+     <f:optionalBlock name="enableMilestone" title="Use milestone" inline="true" checked="${instance.enableMilestone}">
+       <f:entry title="Milestone" field="testrailMilestone">
+         <f:select />
+       </f:entry>
+     </f:optionalBlock>
+   </table>
+  </f:block>
+
+  <f:block>
+   <table>
+       <f:entry title="Extra Parameters" field="extraParams">
+         <f:textbox />
+       </f:entry>
+   </table>
   </f:block>
 </j:jelly>

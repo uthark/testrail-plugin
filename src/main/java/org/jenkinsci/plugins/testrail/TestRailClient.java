@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.InterruptedException;
 import java.util.List;
+import java.util.Iterator;
 import static org.jenkinsci.plugins.testrail.Utils.*;
 /**
  * Created by Drew on 3/19/14.
@@ -167,8 +168,12 @@ public class TestRailClient {
     }
 
     public boolean authenticationWorks() throws IOException {
-        TestRailResponse response = httpGet("/index.php?/api/v2/get_projects");
-        return (200 == response.getStatus());
+        try {
+            TestRailResponse response = httpGet("/index.php?/api/v2/get_projects");
+            return (200 == response.getStatus());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public Project[] getProjects() throws IOException, ElementNotFoundException {
@@ -218,14 +223,40 @@ public class TestRailClient {
         return suites;
     }
 
+    public Run[] getRuns(int projectId) throws IOException, ElementNotFoundException {
+        String body = httpGet("index.php?/api/v2/get_runs/" + projectId).getBody();
+
+        JSONArray json;
+
+        try {
+            json = new JSONArray(body);
+        } catch (JSONException e) {
+            throw new ElementNotFoundException("No runs for project " + projectId + "! Response from TestRail is: \n" + body);
+        }
+
+        Run[] runs = new Run[json.length()];
+        for (int i = 0; i < json.length(); i++) {
+            JSONObject o = json.getJSONObject(i);
+            runs[i] = createRunFromJson(o);
+        }
+
+        return runs;
+    }
+
     public String getCasesString(int projectId, int suiteId) {
         return "index.php?/api/v2/get_cases/" + projectId + "&suite_id=" + suiteId;
     }
 
     public Case[] getCases(int projectId, int suiteId) throws IOException, ElementNotFoundException {
-        // "/#{project_id}&suite_id=#{suite_id}#{section_string}"
-        String body = httpGet("index.php?/api/v2/get_cases/" + projectId + "&suite_id=" + suiteId).getBody();
-        JSONArray json = new JSONArray(body);
+        String body = httpGet(getCasesString(projectId, suiteId)).getBody();
+
+        JSONArray json;
+
+        try {
+            json = new JSONArray(body);
+        } catch (JSONException e) {
+            throw new ElementNotFoundException("No cases for project " + projectId + " and suite " + suiteId + "! Response from TestRail is: \n" + body);
+        }
 
         Case[] cases = new Case[json.length()];
         for (int i = 0; i < json.length(); i++) {
@@ -267,7 +298,6 @@ public class TestRailClient {
 
     public Section addSection(String sectionName, int projectId, int suiteId, String parentId) 
             throws IOException, ElementNotFoundException, TestRailException {
-        //Section section = new Section();
         String payload = new JSONObject().put("name", sectionName).put("suite_id", suiteId).put("parent_id", parentId).toString();
         String body = httpPost("index.php?/api/v2/add_section/" + projectId , payload).getBody();
         JSONObject o = new JSONObject(body);
@@ -286,6 +316,19 @@ public class TestRailClient {
         return s;
     }
 
+    private Run createRunFromJson(JSONObject o) {
+        Run r = new Run();
+
+        r.setId(o.getInt("id") + "");
+        r.setSuiteId(o.getInt("suite_id") + "");
+        r.setName(o.getString("name"));
+        if (!o.isNull("milestone_id")) {
+            r.setMilestoneId(o.getInt("milestone_id") + "");
+        }
+
+        return r;
+    }
+
     public Case addCase(Testcase caseToAdd, int sectionId) 
             throws IOException, TestRailException {
         JSONObject payload = new JSONObject().put("title", caseToAdd.getName());
@@ -298,13 +341,21 @@ public class TestRailClient {
         return c;
     }
 
-    public TestRailResponse addResultsForCases(int runId, Results results) 
+    public TestRailResponse addResultsForCases(int runId, Results results, String extraParameters) 
             throws IOException, TestRailException {
         JSONArray a = new JSONArray();
         for (int i = 0; i < results.getResults().size(); i++) {
             JSONObject o = new JSONObject();
             Result r = results.getResults().get(i);
-            o.put("case_id", r.getCaseId()).put("status_id", r.getStatusId()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
+            o.put("case_id", r.getCaseId()).put("status_id", r.getStatus().getValue()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
+
+            JSONObject xp = new JSONObject(extraParameters);
+            Iterator<String> keys = xp.keys();
+            while (keys.hasNext()) {
+                String k = keys.next();
+                o.put(k, xp.get(k).toString());
+            }
+
             a.put(o);
         }
 
@@ -347,6 +398,15 @@ public class TestRailClient {
          }
       }
       throw new ElementNotFoundException("Milestone id not found.");
+    }
+
+    public String getMilestoneName(String milestoneId, int projectId) throws IOException, ElementNotFoundException {
+      for (Milestone mstone: getMilestones(projectId)) {
+        if (mstone.getId() == milestoneId) {
+          return mstone.getName();
+        }
+      }
+      throw new ElementNotFoundException("Milestone " + milestoneId + " not found in Project " + projectId);
     }
 
     public boolean closeRun(int runId)
