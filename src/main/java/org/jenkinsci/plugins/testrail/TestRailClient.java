@@ -348,12 +348,13 @@ public class TestRailClient {
             JSONObject o = new JSONObject();
             Result r = results.getResults().get(i);
             o.put("case_id", r.getCaseId()).put("status_id", r.getStatus().getValue()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
-
-            JSONObject xp = new JSONObject(extraParameters);
-            Iterator<String> keys = xp.keys();
-            while (keys.hasNext()) {
-                String k = keys.next();
-                o.put(k, xp.get(k).toString());
+            if (extraParameters.length() > 0) {
+                JSONObject xp = new JSONObject(extraParameters);
+                Iterator<String> keys = xp.keys();
+                while (keys.hasNext()) {
+                    String k = keys.next();
+                    o.put(k, xp.get(k).toString());
+                }
             }
 
             a.put(o);
