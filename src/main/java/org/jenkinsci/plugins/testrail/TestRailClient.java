@@ -178,7 +178,14 @@ public class TestRailClient {
 
     public Project[] getProjects() throws IOException, ElementNotFoundException {
         String body = httpGet("/index.php?/api/v2/get_projects").getBody();
-        JSONArray json = new JSONArray(body);
+        JSONArray json;
+        try { // testrail will return a single object rather than an array if there
+              // is only one project
+            json = new JSONArray(body);
+        } catch (Exception e) {
+            json = new JSONArray();
+            json.put(new JSONObject(body));
+        }
         Project[] projects = new Project[json.length()];
         for (int i = 0; i < json.length(); i++) {
             JSONObject o = json.getJSONObject(i);
