@@ -51,10 +51,11 @@ public class TestRailNotifier extends Notifier {
     private boolean createNewTestcases;
     private boolean useExistingRun;
     private String testRun;
+    private boolean createNewTestcases;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParams, boolean createNewTestcases, boolean useExistingRun, String testRun) {
+    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParams, boolean createNewTestcases, boolean useExistingRun, String testRun, boolean createNewTestcases) {
         this.testrailProject = testrailProject;
         this.testrailSuite = testrailSuite;
         this.junitResultsGlob = junitResultsGlob;
@@ -68,6 +69,7 @@ public class TestRailNotifier extends Notifier {
             testRun = "0";
         }
         this.testRun = testRun;
+        this.createNewTestcases = createNewTestcases;
     }
 
     public void setTestrailProject(int project) { this.testrailProject = project;}
@@ -88,6 +90,8 @@ public class TestRailNotifier extends Notifier {
     public boolean getUseExistingRun() { return this.useExistingRun; }
     public void setTestRun(String runId) { this.testRun = runId; }
     public String getTestRun() { return this.testRun; }
+    public void setCreateNewTestcases(boolean newcases) {this.createNewTestcases = newcases; }
+    public boolean getCreateNewTestcases() { return  this.createNewTestcases; }
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {

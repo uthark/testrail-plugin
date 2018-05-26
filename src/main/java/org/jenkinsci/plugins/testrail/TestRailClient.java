@@ -249,7 +249,6 @@ public class TestRailClient {
 
     public Case[] getCases(int projectId, int suiteId) throws IOException, ElementNotFoundException {
         String body = httpGet(getCasesString(projectId, suiteId)).getBody();
-
         JSONArray json;
 
         try {
@@ -348,6 +347,7 @@ public class TestRailClient {
             JSONObject o = new JSONObject();
             Result r = results.getResults().get(i);
             o.put("case_id", r.getCaseId()).put("status_id", r.getStatus().getValue()).put("comment", r.getComment()).put("elapsed", r.getElapsedTimeString());
+
             if (extraParameters.length() > 0) {
                 JSONObject xp = new JSONObject(extraParameters);
                 Iterator<String> keys = xp.keys();
