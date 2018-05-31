@@ -48,14 +48,13 @@ public class TestRailNotifier extends Notifier {
     private String testrailMilestone;
     private boolean enableMilestone;
     private String extraParameters;
-    private boolean createNewTestcases;
     private boolean useExistingRun;
     private String testRun;
     private boolean createNewTestcases;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParams, boolean createNewTestcases, boolean useExistingRun, String testRun, boolean createNewTestcases) {
+    public TestRailNotifier(int testrailProject, int testrailSuite, String junitResultsGlob, String testrailMilestone, boolean enableMilestone, String extraParams, boolean createNewTestcases, boolean useExistingRun, String testRun) {
         this.testrailProject = testrailProject;
         this.testrailSuite = testrailSuite;
         this.junitResultsGlob = junitResultsGlob;
@@ -84,8 +83,6 @@ public class TestRailNotifier extends Notifier {
     public boolean getEnableMilestone() { return  this.enableMilestone; }
     public void setExtraParams(String params) { this.extraParameters = params; }
     public String getExtraParams() { return this.extraParameters; }
-    public void setCreateNewTestcases(boolean newcases) {this.createNewTestcases = newcases; }
-    public boolean getCreateNewTestcases() { return  this.createNewTestcases; }
     public void setUseExistingRun(boolean newrun) { this.useExistingRun = newrun; }
     public boolean getUseExistingRun() { return this.useExistingRun; }
     public void setTestRun(String runId) { this.testRun = runId; }
