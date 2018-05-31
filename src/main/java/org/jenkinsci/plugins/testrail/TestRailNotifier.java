@@ -238,7 +238,11 @@ public class TestRailNotifier extends Notifier {
 	                if (caseFailure != null) {
 	                    caseStatus = CaseStatus.FAILED;
 	                    caseComment = (caseFailure.getMessage() == null) ? caseFailure.getText() : caseFailure.getMessage() + "\n" + caseFailure.getText();
-	                } else if (testcase.getSkipped() != null) {
+	                } else if (testCase.getError() != null) {
+                        Error caseError = testcase.getError();
+                        caseStatus = CaseStatus.BLOCKED;
+                        caseComment = (caseError.getMessage() == null) ? caseError.getText() : caseError.getMessage() + "\n" + caseError.getText();
+                    } else if (testcase.getSkipped() != null) {
 	                    caseStatus = CaseStatus.UNTESTED;
 	                } else {
 	                    caseStatus = CaseStatus.PASSED;
