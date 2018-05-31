@@ -240,7 +240,7 @@ public class TestRailNotifier extends Notifier {
 	                    caseComment = (caseFailure.getMessage() == null) ? caseFailure.getText() : caseFailure.getMessage() + "\n" + caseFailure.getText();
 	                } else if (testCase.getError() != null) {
                         Error caseError = testcase.getError();
-                        caseStatus = CaseStatus.BLOCKED;
+                        caseStatus = CaseStatus.FAILED;
                         caseComment = (caseError.getMessage() == null) ? caseError.getText() : caseError.getMessage() + "\n" + caseError.getText();
                     } else if (testcase.getSkipped() != null) {
 	                    caseStatus = CaseStatus.UNTESTED;
