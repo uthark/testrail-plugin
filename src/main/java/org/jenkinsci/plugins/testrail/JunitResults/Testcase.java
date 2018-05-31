@@ -30,7 +30,7 @@ public class Testcase {
     private Skipped skipped;
     private Float time;
     private String refs;
-    private Error error;
+    private JunitError error;
 
     @XmlAttribute
     public void setName(String name) { this.name = name.trim(); }
@@ -39,7 +39,7 @@ public class Testcase {
     @XmlElement(name = "skipped")
     public void setSkipped(Skipped skipped) { this.skipped = skipped; }
     @XmlElement(name = "error")
-    public void setError(Error error) { this.error = error; }
+    public void setError(JunitError error) { this.error = error; }
     @XmlAttribute(name = "time")
     public void setTime(Float time) { this.time = time; }
     @XmlAttribute(name = "refs")
@@ -48,7 +48,7 @@ public class Testcase {
     public String getName() { return this.name; }
     public Failure getFailure() { return this.failure; }
     public Skipped getSkipped() { return this.skipped; }
-    public Error getError() { return this.error; }
+    public JunitError getError() { return this.error; }
     public Float getTime() { return this.time; }
     public String getRefs() { return this.refs; }
 }

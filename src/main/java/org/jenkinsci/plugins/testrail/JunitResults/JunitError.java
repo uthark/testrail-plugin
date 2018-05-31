@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlValue;
 /**
  * Created by Adam Chevalier on 5/31/2018.
  */
-public class Error {
+public class JunitError {
     private String type;
     private String message;
     private String text;
